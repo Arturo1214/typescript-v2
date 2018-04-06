@@ -24,9 +24,10 @@ var Controller = /** @class */ (function () {
         this.amountWoman = document.getElementById("amountWoman");
         this.amountChildren = document.getElementById("amountChildren");
         this.selectMeat = document.getElementById("meatSelect");
-        var resultTotalMeat = document.getElementById("lblResultTotal");
-        var resultTotalMeatType = document.getElementById("lblResultMeat");
-        var resultTotalKindPerson = document.getElementById("lblResultTypePerson");
+        var resultContent = document.getElementById("result");
+        while (resultContent.hasChildNodes()) {
+            resultContent.removeChild(resultContent.lastChild);
+        }
         var biz = new SteakBiz();
         var men = this.amountMen.value;
         var woman = this.amountWoman.value;
@@ -39,9 +40,49 @@ var Controller = /** @class */ (function () {
                 console.log(value);
             }
         }
-        resultTotalMeat.textContent = biz.calculateTotalMeat(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
-        resultTotalMeatType.textContent = biz.calculateTotalMeatType(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
-        resultTotalKindPerson.textContent = biz.calculateTotalKindPerson(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        var resultTotal = biz.calculateTotalMeat(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        var resultTotalMeatType = biz.calculateTotalMeatType(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        var resultTotalKindPerson = biz.calculateTotalKindPerson(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        if (resultTotal) {
+            var elementLavel = document.createElement("label");
+            elementLavel.textContent = 'Total de carne: ';
+            elementLavel.style.fontWeight = 'bold';
+            resultContent.appendChild(elementLavel);
+            var elementLavelResultTotal = document.createElement("label");
+            elementLavelResultTotal.textContent = resultTotal;
+            resultContent.appendChild(elementLavelResultTotal);
+            resultContent.appendChild(document.createElement("br"));
+        }
+        if (resultTotalMeatType) {
+            resultTotalMeatType.forEach(function (i) {
+                var data = i.split(':');
+                if (data.length > 1) {
+                    var elementLavel = document.createElement("label");
+                    elementLavel.textContent = 'Total ' + data[0] + ': ';
+                    elementLavel.style.fontWeight = 'bold';
+                    resultContent.appendChild(elementLavel);
+                    var elementLavelResult = document.createElement("label");
+                    elementLavelResult.textContent = data[1];
+                    resultContent.appendChild(elementLavelResult);
+                    resultContent.appendChild(document.createElement("br"));
+                }
+            });
+        }
+        if (resultTotalKindPerson) {
+            resultTotalKindPerson.forEach(function (i) {
+                var data = i.split(':');
+                if (data.length > 1) {
+                    var elementLavel = document.createElement("label");
+                    elementLavel.textContent = 'Total ' + data[0] + ': ';
+                    elementLavel.style.fontWeight = 'bold';
+                    resultContent.appendChild(elementLavel);
+                    var elementLavelResult = document.createElement("label");
+                    elementLavelResult.textContent = data[1];
+                    resultContent.appendChild(elementLavelResult);
+                    resultContent.appendChild(document.createElement("br"));
+                }
+            });
+        }
     };
     ;
     return Controller;
@@ -67,7 +108,7 @@ var SteakBiz = /** @class */ (function () {
         });
         var integer = Math.floor(totalMeat);
         var decimal = totalMeat % 1;
-        var result = 'Total de carne: ' + integer + ' Kg';
+        var result = integer + ' Kg';
         if (decimal > 0) {
             result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
         }
@@ -75,7 +116,7 @@ var SteakBiz = /** @class */ (function () {
     };
     SteakBiz.prototype.calculateTotalMeatType = function (_menAmount, _womanAmount, _childrenAmount, _meatIdList) {
         var _this = this;
-        var result = '';
+        var result = [];
         _meatIdList.forEach(function (i) {
             // calculation men
             var totalMen = _this.calculateQuantity(i, 1, _menAmount);
@@ -87,17 +128,19 @@ var SteakBiz = /** @class */ (function () {
             var meat = _this.meatSearch(i);
             var integer = Math.floor(totalMeat);
             var decimal = totalMeat % 1;
-            result += meat.name + ': ' + integer + ' Kg';
-            if (decimal > 0) {
-                result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            if (totalMeat > 0) {
+                var resultItem = meat.name + ': ' + integer + ' Kg';
+                if (decimal > 0) {
+                    resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+                }
+                result.push(resultItem);
             }
-            result += '\n';
         });
         return result;
     };
     SteakBiz.prototype.calculateTotalKindPerson = function (_menAmount, _womanAmount, _childrenAmount, _meatIdList) {
         var _this = this;
-        var result = '';
+        var result = [];
         var totalMen = 0;
         var totalWoman = 0;
         var totalChildren = 0;
@@ -109,50 +152,41 @@ var SteakBiz = /** @class */ (function () {
             // calculation children
             totalChildren += _this.calculateQuantity(i, 3, _childrenAmount);
         });
-        var kindPerson = this.kindPersonSearch(1);
-        var integer = Math.floor(totalMen);
-        var decimal = totalMen % 1;
-        result += kindPerson.name + ': ' + integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
-        }
-        result += '\n';
-        kindPerson = this.kindPersonSearch(2);
-        integer = Math.floor(totalWoman);
-        decimal = totalWoman % 1;
-        result += kindPerson.name + ': ' + integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
-        }
-        result += '\n';
-        kindPerson = this.kindPersonSearch(3);
-        integer = Math.floor(totalChildren);
-        decimal = totalChildren % 1;
-        result += kindPerson.name + ': ' + integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
-        }
-        result += '\n';
-        return result;
-    };
-    SteakBiz.prototype.calculateQuantityString = function (_meatId, _kindPersonID, _amount) {
-        var loadData = new LoadedData();
-        this.meatKindPersonList = loadData.getListMeatKindPerson();
-        var meatKindPerson;
-        this.meatKindPersonList.forEach(function (i) {
-            if (i.meat.id === _meatId && i.kindPerson.id === _kindPersonID) {
-                meatKindPerson = i;
-                var amountCalculation = (meatKindPerson.amount * _amount);
-                var integer = Math.floor(amountCalculation);
-                var decimal = amountCalculation % 1;
-                var result = meatKindPerson.meat.name + ': ' + integer + ' Kg';
-                if (decimal > 0) {
-                    result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
-                }
-                return result;
+        var resultItem = '';
+        var kindPerson;
+        var integer;
+        var decimal;
+        if (totalMen > 0) {
+            kindPerson = this.kindPersonSearch(1);
+            integer = Math.floor(totalMen);
+            decimal = totalMen % 1;
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
             }
-        });
-        return "No se pudo Calcular el monto total de carne";
+            result.push(resultItem);
+        }
+        if (totalWoman > 0) {
+            kindPerson = this.kindPersonSearch(2);
+            integer = Math.floor(totalWoman);
+            decimal = totalWoman % 1;
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            }
+            result.push(resultItem);
+        }
+        if (totalChildren > 0) {
+            kindPerson = this.kindPersonSearch(3);
+            integer = Math.floor(totalChildren);
+            decimal = totalChildren % 1;
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            }
+            result.push(resultItem);
+        }
+        return result;
     };
     SteakBiz.prototype.calculateQuantity = function (_meatId, _kindPersonID, _amount) {
         var loadData = new LoadedData();

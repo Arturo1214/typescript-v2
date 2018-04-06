@@ -9,6 +9,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css">
+
+        <style>
+            label {
+                clear:left;
+                text-align:right;
+                padding-right:10px;
+            }
+        </style>
     </head>
     <body>
 
@@ -44,12 +52,9 @@
                 <button type="button" class="btn btn-primary" onclick="calcularMonto()">Calcular Cantidades</button>
             </div>
 
-            <br>
-            <label id="lblResultTotal" style="color: #014c8c"></label>
-            <br>
-            <label id="lblResultMeat" style="color: #014c8c"></label>
-            <br>
-            <label id="lblResultTypePerson" style="color: #014c8c"></label>
+            <div id="result">
+
+            </div>
         </div>
 
         <script src="js/biz/SteakBiz.js"></script>

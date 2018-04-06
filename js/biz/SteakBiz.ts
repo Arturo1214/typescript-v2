@@ -27,9 +27,10 @@ class Controller {
         this.amountWoman  = document.getElementById("amountWoman");
         this.amountChildren = document.getElementById("amountChildren");
         this.selectMeat = document.getElementById("meatSelect");
-        let resultTotalMeat : any = document.getElementById("lblResultTotal");
-        let resultTotalMeatType : any = document.getElementById("lblResultMeat");
-        let resultTotalKindPerson : any = document.getElementById("lblResultTypePerson");
+        let resultContent = document.getElementById("result");
+        while (resultContent.hasChildNodes()) {
+            resultContent.removeChild(resultContent.lastChild);
+        }
         let biz = new  SteakBiz();
         let men = this.amountMen.value;
         let woman = this.amountWoman.value;
@@ -42,9 +43,55 @@ class Controller {
                 console.log(value);
             }
         }
-        resultTotalMeat.textContent = biz.calculateTotalMeat(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
-        resultTotalMeatType.textContent = biz.calculateTotalMeatType(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
-        resultTotalKindPerson.textContent = biz.calculateTotalKindPerson(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        let resultTotal: string = biz.calculateTotalMeat(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        let resultTotalMeatType = biz.calculateTotalMeatType(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        let resultTotalKindPerson  = biz.calculateTotalKindPerson(parseInt(men), parseInt(woman), parseInt(children), meatIdList);
+        if (resultTotal) {
+            let elementLavel = document.createElement("label");
+            elementLavel.textContent = 'Total de carne: ';
+            elementLavel.style.fontWeight = 'bold';
+            resultContent.appendChild(elementLavel);
+
+            let elementLavelResultTotal = document.createElement("label");
+            elementLavelResultTotal.textContent = resultTotal;
+            resultContent.appendChild(elementLavelResultTotal);
+
+            resultContent.appendChild(document.createElement("br"));
+        }
+
+        if (resultTotalMeatType) {
+            resultTotalMeatType.forEach(i => {
+                let data = i.split(':');
+                if (data.length > 1) {
+                    let elementLavel = document.createElement("label");
+                    elementLavel.textContent = 'Total ' + data[0] + ': ';
+                    elementLavel.style.fontWeight = 'bold';
+                    resultContent.appendChild(elementLavel);
+
+                    let elementLavelResult = document.createElement("label");
+                    elementLavelResult.textContent = data[1];
+                    resultContent.appendChild(elementLavelResult);
+                    resultContent.appendChild(document.createElement("br"));
+                }
+            });
+        }
+
+        if (resultTotalKindPerson) {
+            resultTotalKindPerson.forEach(i => {
+                let data = i.split(':');
+                if (data.length > 1) {
+                    let elementLavel = document.createElement("label");
+                    elementLavel.textContent = 'Total ' + data[0] + ': ';
+                    elementLavel.style.fontWeight = 'bold';
+                    resultContent.appendChild(elementLavel);
+
+                    let elementLavelResult = document.createElement("label");
+                    elementLavelResult.textContent = data[1];
+                    resultContent.appendChild(elementLavelResult);
+                    resultContent.appendChild(document.createElement("br"));
+                }
+            });
+        }
     };
 }
 
@@ -75,7 +122,7 @@ class SteakBiz {
 
         let integer : number = Math.floor(totalMeat);
         let decimal : number = totalMeat % 1;
-        let result: string = 'Total de carne: '+ integer + ' Kg';
+        let result: string = integer + ' Kg';
         if (decimal > 0) {
             result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
         }
@@ -83,8 +130,8 @@ class SteakBiz {
         return result;
     }
 
-    calculateTotalMeatType(_menAmount: number, _womanAmount: number, _childrenAmount: number, _meatIdList: Array<number>) : string {
-        let result: string = '';
+    calculateTotalMeatType(_menAmount: number, _womanAmount: number, _childrenAmount: number, _meatIdList: Array<number>) : Array<string> {
+        let result: Array<string> = [];
         _meatIdList.forEach( i => {
             // calculation men
             let totalMen: number = this.calculateQuantity(i, 1, _menAmount);
@@ -97,23 +144,25 @@ class SteakBiz {
 
             let integer : number = Math.floor(totalMeat);
             let decimal : number = totalMeat % 1;
-            result += meat.name + ': '+ integer + ' Kg';
-            if (decimal > 0) {
-                result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            if (totalMeat > 0) {
+                let resultItem: string  = meat.name + ': ' + integer + ' Kg';
+                if (decimal > 0) {
+                    resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+                }
+                result.push(resultItem);
             }
-            result += '\n';
 
         });
 
         return result;
     }
 
-    calculateTotalKindPerson(_menAmount: number, _womanAmount: number, _childrenAmount: number, _meatIdList: Array<number>) : string {
-        let result: string = '';
+    calculateTotalKindPerson(_menAmount: number, _womanAmount: number, _childrenAmount: number, _meatIdList: Array<number>) : Array<string> {
+        let result: Array<string> = [];
         let totalMen: number = 0;
         let totalWoman: number = 0;
         let totalChildren: number = 0;
-        _meatIdList.forEach( i => {
+        _meatIdList.forEach(i => {
             // calculation men
             totalMen += this.calculateQuantity(i, 1, _menAmount);
             // calculation woman
@@ -122,60 +171,48 @@ class SteakBiz {
             totalChildren += this.calculateQuantity(i, 3, _childrenAmount);
         });
 
-        let kindPerson: KindPerson = this.kindPersonSearch(1);
+        let resultItem: string = '';
+        let kindPerson: KindPerson;
+        let integer: number;
+        let decimal: number;
+        if (totalMen > 0) {
+            kindPerson = this.kindPersonSearch(1);
 
-        let integer : number = Math.floor(totalMen);
-        let decimal : number = totalMen % 1;
-        result += kindPerson.name + ': '+ integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            integer = Math.floor(totalMen);
+            decimal = totalMen % 1;
+
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            }
+            result.push(resultItem);
         }
-        result += '\n';
 
-        kindPerson = this.kindPersonSearch(2);
+        if (totalWoman > 0) {
+            kindPerson = this.kindPersonSearch(2);
 
-        integer = Math.floor(totalWoman);
-        decimal = totalWoman % 1;
-        result += kindPerson.name + ': '+ integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            integer = Math.floor(totalWoman);
+            decimal = totalWoman % 1;
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            }
+            result.push(resultItem);
         }
-        result += '\n';
 
-        kindPerson = this.kindPersonSearch(3);
+        if (totalChildren > 0) {
+            kindPerson = this.kindPersonSearch(3);
 
-        integer = Math.floor(totalChildren);
-        decimal = totalChildren % 1;
-        result += kindPerson.name + ': '+ integer + ' Kg';
-        if (decimal > 0) {
-            result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            integer = Math.floor(totalChildren);
+            decimal = totalChildren % 1;
+            resultItem = kindPerson.name + ': ' + integer + ' Kg';
+            if (decimal > 0) {
+                resultItem = resultItem + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
+            }
+            result.push(resultItem);
         }
-        result += '\n';
 
         return result;
-    }
-
-    calculateQuantityString(_meatId: number, _kindPersonID: number, _amount: number) : string {
-        let loadData : LoadedData = new LoadedData();
-        this.meatKindPersonList = loadData.getListMeatKindPerson();
-        let meatKindPerson: MeatKindPerson;
-
-        this.meatKindPersonList.forEach( i => {
-            if (i.meat.id === _meatId && i.kindPerson.id === _kindPersonID) {
-                meatKindPerson = i;
-                let amountCalculation : number = (meatKindPerson.amount * _amount);
-                let integer : number = Math.floor(amountCalculation);
-                let decimal : number = amountCalculation % 1;
-                let result: string = meatKindPerson.meat.name + ': '+ integer + ' Kg';
-                if (decimal > 0) {
-                    result = result + ' con ' + (Math.round(decimal * 10) * 100) + ' gramos';
-                }
-
-                return result;
-            }
-        });
-
-        return "No se pudo Calcular el monto total de carne";
     }
 
     calculateQuantity(_meatId: number, _kindPersonID: number, _amount: number) : number {
