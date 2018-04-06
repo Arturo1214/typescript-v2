@@ -1,4 +1,4 @@
-
+// Created by: Arturo Herrera O.
 class Controller {
 
     amountMen : any = document.getElementById("amountMen");
@@ -21,7 +21,7 @@ class Controller {
         });
     }
 
-    calcularMonto()
+    calculateAmount()
     {
         this.amountMen  = document.getElementById("amountMen");
         this.amountWoman  = document.getElementById("amountWoman");

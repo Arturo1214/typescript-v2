@@ -1,3 +1,4 @@
+// Created by: Arturo Herrera O.
 var Controller = /** @class */ (function () {
     function Controller() {
         var _this = this;
@@ -18,7 +19,7 @@ var Controller = /** @class */ (function () {
             _this.selectMeat.appendChild(opt);
         });
     }
-    Controller.prototype.calcularMonto = function () {
+    Controller.prototype.calculateAmount = function () {
         this.amountMen = document.getElementById("amountMen");
         this.amountWoman = document.getElementById("amountWoman");
         this.amountChildren = document.getElementById("amountChildren");
